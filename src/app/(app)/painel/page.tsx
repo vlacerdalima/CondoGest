@@ -1,6 +1,8 @@
-import { PageHeader } from "@/components/ui/page-header";
+import type { Metadata } from "next";
+import { PainelCarteira } from "@/components/gestao/painel/painel-carteira";
 
-// PROVISÓRIO — página a ser construída pelo agente "Gestão".
+export const metadata: Metadata = { title: "Painel da carteira" };
+
 export default function Pagina() {
-  return <PageHeader titulo="Painel da carteira" descricao="Em construção." />;
+  return <PainelCarteira />;
 }

@@ -1,6 +1,14 @@
-import { PageHeader } from "@/components/ui/page-header";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { Carregando } from "@/components/gestao/carregando";
+import { CentralInsights } from "@/components/gestao/insights/central-insights";
 
-// PROVISÓRIO — página a ser construída pelo agente "Gestão".
+export const metadata: Metadata = { title: "Insights" };
+
 export default function Pagina() {
-  return <PageHeader titulo="Insights" descricao="Em construção." />;
+  return (
+    <Suspense fallback={<Carregando titulo="Insights" />}>
+      <CentralInsights />
+    </Suspense>
+  );
 }

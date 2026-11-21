@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "gerar:contas": "tsx scripts/gerar-contas.tsx"
   },
   "dependencies": {
+    "@react-pdf/primitives": "^4.4.0",
     "@react-pdf/renderer": "^4.9.0",
     "clsx": "^2.1.1",
     "lucide-react": "^1.77.0",

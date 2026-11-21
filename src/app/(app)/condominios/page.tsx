@@ -1,6 +1,8 @@
-import { PageHeader } from "@/components/ui/page-header";
+import type { Metadata } from "next";
+import { ListaCondominios } from "@/components/gestao/condominios/lista-condominios";
 
-// PROVISÓRIO — página a ser construída pelo agente "Gestão".
+export const metadata: Metadata = { title: "Condomínios" };
+
 export default function Pagina() {
-  return <PageHeader titulo="Condomínios" descricao="Em construção." />;
+  return <ListaCondominios />;
 }

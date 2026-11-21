@@ -1,6 +1,11 @@
-import { PageHeader } from "@/components/ui/page-header";
+import type { Metadata } from "next";
+import { VisaoCarteiraEnergia } from "@/components/energia/visao-carteira";
 
-// PROVISÓRIO — página a ser construída pelo agente "Energia".
+export const metadata: Metadata = {
+  title: "Energia",
+  description: "Consumo de energia por dia, linha de base, alertas e recomendações com número para a carteira.",
+};
+
 export default function Pagina() {
-  return <PageHeader titulo="Energia" descricao="Em construção." />;
+  return <VisaoCarteiraEnergia />;
 }

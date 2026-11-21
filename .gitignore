@@ -42,3 +42,6 @@ next-env.d.ts
 
 # material de referência local (não versionar)
 /midia/
+
+# saída do gerador de contas fictícias (CLI)
+/contas-geradas/
