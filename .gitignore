@@ -40,5 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# material de referência local (contas reais com dados pessoais — não versionar)
-/midia/contas_reais/
+# material de referência local (não versionar)
+/midia/
