@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <mask id="j">
+      <rect width="48" height="48" fill="white"/>
+      <rect x="19" y="23" width="3.2" height="3.2" fill="black"/>
+      <rect x="25.8" y="23" width="3.2" height="3.2" fill="black"/>
+      <rect x="19" y="28.4" width="3.2" height="3.2" fill="black"/>
+      <rect x="25.8" y="28.4" width="3.2" height="3.2" fill="black"/>
+      <rect x="21.8" y="33.6" width="4.4" height="5.4" fill="black"/>
+    </mask>
+  </defs>
+  <path d="M42.79 17.16A20 20 0 1 1 27.47 4.3" fill="none" stroke="#0b8a80" stroke-width="4" stroke-linecap="round"/>
+  <path d="M12.5 21.6 24 14.6l11.5 7" fill="none" stroke="#0b8a80" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#0b8a80" mask="url(#j)">
+    <rect x="16.5" y="20.5" width="15" height="18.5"/>
+    <rect x="11" y="26.5" width="5.5" height="12.5"/>
+    <rect x="31.5" y="26.5" width="5.5" height="12.5"/>
+  </g>
+  <path d="M38.6 1.6 31.6 10.6h4.6l-2.6 6.6 7.6-9.6h-4.6l2-6Z" fill="#f4b42c"/>
+</svg>

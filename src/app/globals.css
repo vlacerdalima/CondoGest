@@ -1,26 +1,193 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens do CondoGest.
+ * Cores da marca vêm do logo: teal (prédio/anel) + âmbar (raio de energia).
+ * Paleta de gráficos (chart-1..7) validada com o validador de paleta da skill
+ * de dataviz (claro e escuro): CVD, piso de visão normal, banda de luminosidade.
+ * Status (ok/warn/serious/critical) é reservado para estados — nunca para séries.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --background: #f5f7f6;
+  --surface: #ffffff;
+  --surface-2: #f0f3f2;
+  --foreground: #0f1f1d;
+  --muted: #55625f;
+  --subtle: #7d8986;
+  --border: #dde4e2;
+  --border-strong: #c3cdca;
+
+  --primary: #0b7a71;
+  --primary-hover: #096860;
+  --primary-foreground: #ffffff;
+  --primary-soft: #e3f3f1;
+
+  --energy: #b87900;
+  --energy-strong: #f4b42c;
+  --energy-soft: #fff4d6;
+
+  --chart-1: #00968a;
+  --chart-2: #eb6834;
+  --chart-3: #2a78d6;
+  --chart-4: #eda100;
+  --chart-5: #e87ba4;
+  --chart-6: #6250d6;
+  --chart-7: #e34948;
+  --chart-grid: #e6ebea;
+  --chart-axis: #7d8986;
+
+  --ok: #0a7f0a;
+  --ok-soft: #e4f5e4;
+  --warn: #b37a00;
+  --warn-soft: #fff3d1;
+  --serious: #c2410c;
+  --serious-soft: #ffe9dd;
+  --critical: #c42f2f;
+  --critical-soft: #fde6e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --background: #0e1413;
+    --surface: #161d1c;
+    --surface-2: #1d2624;
+    --foreground: #edf2f1;
+    --muted: #a9b5b2;
+    --subtle: #85928f;
+    --border: #2a3533;
+    --border-strong: #3a4744;
+
+    --primary: #21b3a5;
+    --primary-hover: #36c2b4;
+    --primary-foreground: #04201d;
+    --primary-soft: #133632;
+
+    --energy: #f4b42c;
+    --energy-strong: #f4b42c;
+    --energy-soft: #3a2e10;
+
+    --chart-1: #14a597;
+    --chart-2: #d95926;
+    --chart-3: #3987e5;
+    --chart-4: #c98500;
+    --chart-5: #d55181;
+    --chart-6: #9085e9;
+    --chart-7: #e66767;
+    --chart-grid: #26302e;
+    --chart-axis: #85928f;
+
+    --ok: #2fbf2f;
+    --ok-soft: #13301a;
+    --warn: #fab219;
+    --warn-soft: #3a2e10;
+    --serious: #ec835a;
+    --serious-soft: #3d2216;
+    --critical: #ef6b6b;
+    --critical-soft: #3d1a1a;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #0e1413;
+  --surface: #161d1c;
+  --surface-2: #1d2624;
+  --foreground: #edf2f1;
+  --muted: #a9b5b2;
+  --subtle: #85928f;
+  --border: #2a3533;
+  --border-strong: #3a4744;
+
+  --primary: #21b3a5;
+  --primary-hover: #36c2b4;
+  --primary-foreground: #04201d;
+  --primary-soft: #133632;
+
+  --energy: #f4b42c;
+  --energy-strong: #f4b42c;
+  --energy-soft: #3a2e10;
+
+  --chart-1: #14a597;
+  --chart-2: #d95926;
+  --chart-3: #3987e5;
+  --chart-4: #c98500;
+  --chart-5: #d55181;
+  --chart-6: #9085e9;
+  --chart-7: #e66767;
+  --chart-grid: #26302e;
+  --chart-axis: #85928f;
+
+  --ok: #2fbf2f;
+  --ok-soft: #13301a;
+  --warn: #fab219;
+  --warn-soft: #3a2e10;
+  --serious: #ec835a;
+  --serious-soft: #3d2216;
+  --critical: #ef6b6b;
+  --critical-soft: #3d1a1a;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+
+  --color-energy: var(--energy);
+  --color-energy-strong: var(--energy-strong);
+  --color-energy-soft: var(--energy-soft);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-chart-7: var(--chart-7);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-axis: var(--chart-axis);
+
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-serious: var(--serious);
+  --color-serious-soft: var(--serious-soft);
+  --color-critical: var(--critical);
+  --color-critical-soft: var(--critical-soft);
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum" 0;
+}
+
+/* Números tabulares em tabelas e KPIs */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+  .no-print {
+    display: none !important;
+  }
 }
