@@ -376,14 +376,14 @@ export function GeradorDeContas() {
                 ))}
               </select>
             </Campo>
-            <Campo id="bandeira" rotulo="Bandeira tarifária">
+            <Campo id="bandeira" rotulo="Bandeira tarifária" dica="auto: calendário">
               <select
                 id="bandeira"
                 className={estiloCampo}
                 value={form.bandeira}
                 onChange={(e) => mudar("bandeira", e.target.value as Formulario["bandeira"])}
               >
-                <option value="">Automática (calendário)</option>
+                <option value="">Automática</option>
                 {BANDEIRAS.map((b) => (
                   <option key={b} value={b}>
                     {ROTULO_BANDEIRA[b]}
