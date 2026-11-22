@@ -456,6 +456,8 @@ export interface PontoSerie {
   componentes: Record<ComponenteCusto, number>;
   /** Todas as UCs ativas têm todas as faturas do mês */
   completo: boolean;
+  /** Todas as UCs ativas têm o consumo do mês (kWh/dia comparável, mesmo sem todas as faturas) */
+  kwhCompleto: boolean;
   ucsPresentes: string[];
   porUc: Record<string, { kwh: number; kwhDia: number; custo: number }>;
   temEnvio: boolean;
@@ -479,6 +481,7 @@ export function montarSerie(condominio: Condominio, dados: DadosEnergiaUc[]): Po
       return mapa.has(competencia) || janela.some((c) => mapa.has(c));
     });
     const completo = ativas.every((d) => porUc.get(d.uc.id)!.get(competencia)?.completo);
+    const kwhCompleto = ativas.every((d) => (porUc.get(d.uc.id)!.get(competencia)?.kwh ?? 0) > 0);
 
     const kwh = soma(registros.map((m) => m.kwh));
     const kwhDia = soma(registros.map((m) => m.kwhDia));
@@ -520,6 +523,7 @@ export function montarSerie(condominio: Condominio, dados: DadosEnergiaUc[]): Po
         : undefined,
       componentes,
       completo,
+      kwhCompleto,
       ucsPresentes: registros.map((m) => m.ucId),
       porUc: Object.fromEntries(registros.map((m) => [m.ucId, { kwh: m.kwh, kwhDia: m.kwhDia, custo: m.custo }])),
       temEnvio: registros.some((m) => m.temEnvio),

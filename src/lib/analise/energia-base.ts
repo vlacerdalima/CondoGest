@@ -78,7 +78,7 @@ export interface BaseAnalise {
 }
 
 function entradas(serie: PontoSerie[]) {
-  return serie.filter((p) => p.kwh > 0).map((p) => ({ competencia: p.competencia, valor: p.kwhDia, ocupadas: p.ocupadas, dias: p.dias }));
+  return serie.filter((p) => p.kwhCompleto).map((p) => ({ competencia: p.competencia, valor: p.kwhDia, ocupadas: p.ocupadas, dias: p.dias }));
 }
 
 export function montarBaseAnalise(condominio: Condominio, contas: Conta[]): BaseAnalise {

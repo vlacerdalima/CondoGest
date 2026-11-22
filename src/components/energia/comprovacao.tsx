@@ -24,9 +24,9 @@ import {
   type RecomendacaoEnergia,
   type Veredito,
 } from "@/lib/analise/energia";
-import { formatarCompetencia, formatarCompetenciaLonga, formatarMoeda, formatarNumero } from "@/lib/formatacao";
+import { formatarCompetencia, formatarCompetenciaLonga, formatarMoeda, formatarNumero, formatarNumero1 } from "@/lib/formatacao";
 import { faixaReais, pct, reais, reaisCompacto } from "./formato";
-import { CaixaTooltip, conteudoTooltip, EIXO, GRADE, QuadroGrafico, type ItemLegenda, type LinhaTooltip } from "./graficos-base";
+import { CaixaTooltip, conteudoTooltip, EIXO, escalaBonita, GRADE, QuadroGrafico, type ItemLegenda, type LinhaTooltip } from "./graficos-base";
 
 const VEREDITOS: Record<Veredito, { rotulo: string; tom: "ok" | "atencao" | "critico" | "neutro"; icone: LucideIcon }> = {
   confirmada: { rotulo: "Economia confirmada", tom: "ok", icone: CheckCircle2 },
@@ -68,6 +68,12 @@ export function Comprovacao({
   if (!rec || !resultado) return null;
   const corSerie = cor(rec.ucId);
   const fmt = (v: number) => formatarValorMetrica(rec.metrica, v);
+  /** "245,6 – 258,5 kWh/dia" / "R$ 0,87 – 0,97/kWh" */
+  const faixaMetrica = (a: number, b: number) => {
+    if (rec.metrica === "reais_por_kwh") return `${formatarMoeda(a)} – ${formatarMoeda(b).replace(/^R\$\s?/, "")}/kWh`;
+    if (resultado.definicao.moeda) return `${reais(a)} – ${reais(b)}`;
+    return `${formatarNumero1(a)} – ${formatarNumero1(b)} ${resultado.definicao.unidade}`;
+  };
   const linhas: LinhaGrafico[] = resultado.pontos.map((p) => ({
     competencia: p.competencia,
     rotulo: formatarCompetencia(p.competencia),
@@ -87,6 +93,7 @@ export function Comprovacao({
   const valores = linhas.flatMap((l) => [l.real, l.esperado, ...(l.faixa ?? [])]).filter((v): v is number => v !== undefined);
   const minimo = valores.length ? Math.min(...valores) : 0;
   const maximo = valores.length ? Math.max(...valores) : 1;
+  const escala = escalaBonita(minimo, maximo, 4);
   const tickY = (v: number) =>
     rec.metrica === "reais_por_kwh"
       ? v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -177,10 +184,10 @@ export function Comprovacao({
                   <YAxis
                     {...EIXO}
                     axisLine={false}
-                    width={56}
-                    domain={[Math.max(0, minimo * 0.88), maximo * 1.06]}
+                    width={resultado.definicao.moeda && rec.metrica !== "reais_por_kwh" ? 76 : 52}
+                    domain={escala.dominio}
+                    ticks={escala.ticks}
                     tickFormatter={tickY}
-                    tickCount={5}
                   />
                   {base && (
                     <ReferenceArea
@@ -257,7 +264,7 @@ export function Comprovacao({
                   <div>
                     <dt className="text-xs text-muted">Com a ação</dt>
                     <dd className="tabular text-lg font-semibold text-foreground">
-                      {fmt(resultado.simulacao.comAcao.min)} – {fmt(resultado.simulacao.comAcao.max).replace(/^R\$\s/, "")}
+                      {faixaMetrica(resultado.simulacao.comAcao.min, resultado.simulacao.comAcao.max)}
                     </dd>
                   </div>
                   <div>
@@ -283,20 +290,27 @@ export function Comprovacao({
                 {resultado.mesesDepois.length > 0 && (
                   <dl className="mt-3 grid grid-cols-2 gap-3">
                     <div>
-                      <dt className="text-xs text-muted">Economia média</dt>
+                      <dt className="text-xs text-muted">
+                        {resultado.medicao.economiaMedia >= 0 ? "Economia média" : "Acima do esperado (média)"}
+                      </dt>
                       <dd className="tabular text-lg font-semibold text-foreground">
-                        {fmt(resultado.medicao.economiaMedia)} ({pct(resultado.medicao.economiaPercentual, 1, true)})
+                        {fmt(Math.abs(resultado.medicao.economiaMedia))} ({pct(Math.abs(resultado.medicao.economiaPercentual), 1)})
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-muted">Em reais</dt>
+                      <dt className="text-xs text-muted">{resultado.medicao.economiaReaisMes >= 0 ? "Em reais" : "Custo a mais"}</dt>
                       <dd className="tabular text-lg font-semibold text-foreground">
-                        {reais(resultado.medicao.economiaReaisMes)}/mês
+                        {reais(Math.abs(resultado.medicao.economiaReaisMes))}/mês
                       </dd>
                     </div>
                     <div className="col-span-2">
-                      <dt className="text-xs text-muted">Total desde a ação ({resultado.mesesDepois.length} meses)</dt>
-                      <dd className="tabular text-lg font-semibold text-foreground">{formatarMoeda(resultado.medicao.economiaReaisTotal)}</dd>
+                      <dt className="text-xs text-muted">
+                        {resultado.medicao.economiaReaisTotal >= 0 ? "Economia total" : "Gasto a mais no total"} desde a ação (
+                        {resultado.mesesDepois.length} {resultado.mesesDepois.length === 1 ? "mês" : "meses"})
+                      </dt>
+                      <dd className="tabular text-lg font-semibold text-foreground">
+                        {formatarMoeda(Math.abs(resultado.medicao.economiaReaisTotal))}
+                      </dd>
                     </div>
                   </dl>
                 )}

@@ -12,8 +12,8 @@ import { obterCondominio } from "@/lib/dados";
 import { DATA_REFERENCIA } from "@/lib/dados/referencia";
 import { useContas } from "@/lib/dados/store";
 import { formatarData, formatarMoeda, formatarNumero, formatarNumero1, formatarTarifa } from "@/lib/formatacao";
-import { reaisCompacto } from "./formato";
-import { CaixaTooltip, ChaveCor, conteudoTooltip, EIXO, useMontado } from "./graficos-base";
+import { corSerie, reaisCompacto } from "./formato";
+import { CaixaTooltip, ChaveCor, conteudoTooltip, EIXO, escalaBonita, useMontado } from "./graficos-base";
 
 function formatarValorSlide(g: GraficoSlide, v: number) {
   switch (g.unidade) {
@@ -28,12 +28,14 @@ function formatarValorSlide(g: GraficoSlide, v: number) {
   }
 }
 
-function MiniGrafico({ grafico }: { grafico: GraficoSlide }) {
+function MiniGrafico({ grafico, cor }: { grafico: GraficoSlide; cor: string }) {
   const montado = useMontado();
   const temDestaque = grafico.barras.some((b) => b.destaque);
-  const corBase = temDestaque ? "var(--chart-axis)" : "var(--chart-1)";
+  // Com destaque: ênfase (o resto em cinza); sem destaque: a cor do condomínio
+  const corBase = temDestaque ? "var(--chart-axis)" : cor;
   const resumo = grafico.barras.map((b) => `${b.rotulo}: ${formatarValorSlide(grafico, b.valor)}`).join("; ");
   const maximo = Math.max(...grafico.barras.map((b) => b.valor), ...grafico.referencias.map((r) => r.valor));
+  const escala = escalaBonita(0, maximo * 1.05, 4, true);
   const poucas = grafico.barras.length <= 3;
   return (
     <figure className="flex h-full min-h-0 flex-col">
@@ -52,12 +54,12 @@ function MiniGrafico({ grafico }: { grafico: GraficoSlide }) {
           </li>
         ))}
       </ul>
-      <div className="min-h-[150px] flex-1" role="img" aria-label={`${grafico.titulo}. ${resumo}`}>
+      <div className="h-[190px] sm:h-auto sm:min-h-[150px] sm:flex-1" role="img" aria-label={`${grafico.titulo}. ${resumo}`}>
         {montado && (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={grafico.barras} margin={{ top: 14, right: 4, bottom: 0, left: 0 }} barCategoryGap={poucas ? "35%" : "18%"}>
               <XAxis dataKey="rotulo" {...EIXO} interval={poucas ? 0 : "preserveStartEnd"} minTickGap={6} />
-              <YAxis {...EIXO} axisLine={false} width={46} domain={[0, maximo * 1.1]} tickCount={4} tickFormatter={(v: number) => (grafico.unidade === "R$" ? reaisCompacto(v) : grafico.unidade === "R$/kWh" ? v.toLocaleString("pt-BR", { maximumFractionDigits: 2 }) : formatarNumero(v))} />
+              <YAxis {...EIXO} axisLine={false} width={grafico.unidade === "R$" ? 64 : 46} domain={escala.dominio} ticks={escala.ticks} tickFormatter={(v: number) => (grafico.unidade === "R$" ? reaisCompacto(v) : grafico.unidade === "R$/kWh" ? v.toLocaleString("pt-BR", { maximumFractionDigits: 2 }) : formatarNumero(v))} />
               <Tooltip
                 cursor={{ fill: "var(--chart-grid)", fillOpacity: 0.5 }}
                 content={conteudoTooltip<{ rotulo: string; valor: number }>((b) => (
@@ -153,13 +155,13 @@ export function FalaAssembleia({ condominioId }: { condominioId: string }) {
           <section aria-label="Slide de apoio" className="print:break-inside-avoid">
             <p className="no-print mb-2 text-xs font-semibold tracking-wider text-subtle uppercase">Slide de apoio</p>
             <div className="@container overflow-hidden rounded-2xl border border-border bg-surface shadow-sm sm:aspect-video print:aspect-video print:shadow-none">
-              <div className="flex h-full flex-col gap-4 p-5 text-[15px] sm:flex-row sm:gap-6 sm:p-[4cqw] sm:text-[clamp(11px,1.55cqw,20px)]">
+              <div className="flex h-full flex-col gap-4 p-5 text-[15px] sm:flex-row sm:gap-6 sm:p-[4cqw] sm:text-[clamp(12px,1.75cqw,22px)]">
                 <div className="flex min-w-0 flex-col sm:w-[52%]">
                   <p className="flex items-center gap-1.5 text-[0.8em] font-semibold tracking-wide text-energy uppercase">
                     <Zap className="size-[1.1em]" aria-hidden />
                     Energia · {condominio.nome}
                   </p>
-                  <h2 className="mt-[0.5em] text-[1.75em] leading-[1.12] font-extrabold tracking-tight text-foreground">{fala.slide.titulo}</h2>
+                  <h2 className="mt-[0.5em] text-[1.85em] leading-[1.12] font-extrabold tracking-tight text-balance text-foreground">{fala.slide.titulo}</h2>
                   <div className="mt-[0.9em] rounded-xl bg-energy-soft px-[0.9em] py-[0.6em]">
                     <p className="text-[2.4em] leading-none font-extrabold tracking-tight text-foreground">{fala.slide.numero}</p>
                     <p className="mt-[0.35em] text-[0.85em] font-medium text-muted">{fala.slide.legendaNumero}</p>
@@ -175,7 +177,7 @@ export function FalaAssembleia({ condominioId }: { condominioId: string }) {
                 </div>
                 {fala.slide.grafico && (
                   <div className="min-h-[200px] min-w-0 flex-1 rounded-xl border border-border p-[0.8em]">
-                    <MiniGrafico grafico={fala.slide.grafico} />
+                    <MiniGrafico grafico={fala.slide.grafico} cor={corSerie(condominio.corSerie)} />
                   </div>
                 )}
               </div>

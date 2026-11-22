@@ -53,8 +53,9 @@ function BarraSegmentada({ titulo, segmentos }: { titulo: string; segmentos: Seg
 /* Ponta × fora de ponta                                               */
 /* ------------------------------------------------------------------ */
 
+// Par validado (CVD e visão normal, claro e escuro) e fora das cores das contas
 const COR_PONTA = "var(--chart-4)";
-const COR_FORA = "var(--chart-3)";
+const COR_FORA = "var(--chart-6)";
 
 export function PontaForaPonta({ analise }: { analise: AnaliseUc }) {
   const janela = (analise.janela.length ? analise.janela : analise.meses.slice(-12)).filter((m) => m.pontaKwh !== undefined);
@@ -101,14 +102,14 @@ export function PontaForaPonta({ analise }: { analise: AnaliseUc }) {
           titulo="Parte do consumo (kWh)"
           segmentos={[
             { rotulo: "Na ponta", valor: kwhPonta, cor: COR_PONTA, texto: "#1f1600", detalhe: `${formatarNumero(kwhPonta)} kWh` },
-            { rotulo: "Fora da ponta", valor: kwhFora, cor: COR_FORA, texto: "#ffffff", detalhe: `${formatarNumero(kwhFora)} kWh` },
+            { rotulo: "Fora da ponta", valor: kwhFora, cor: COR_FORA, texto: "var(--surface)", detalhe: `${formatarNumero(kwhFora)} kWh` },
           ]}
         />
         <BarraSegmentada
           titulo="Parte do valor pago pelo consumo (R$)"
           segmentos={[
             { rotulo: "Na ponta", valor: rPonta, cor: COR_PONTA, texto: "#1f1600", detalhe: reais(rPonta) },
-            { rotulo: "Fora da ponta", valor: rFora, cor: COR_FORA, texto: "#ffffff", detalhe: reais(rFora) },
+            { rotulo: "Fora da ponta", valor: rFora, cor: COR_FORA, texto: "var(--surface)", detalhe: reais(rFora) },
           ]}
         />
         <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
@@ -195,6 +196,7 @@ export function ImpactoBandeiras({ resumo }: { resumo: ResumoBandeiras }) {
         A <Termo id="bandeira">bandeira</Termo> fica mais cara quando chove pouco e as usinas térmicas são ligadas — no Nordeste,
         isso costuma acontecer no 2º semestre.
         {resumo.temLivre && " Contas no mercado livre não pagam bandeira sobre a energia."}
+        {" "}Cada conta mostra a bandeira que valeu na maior parte do período de leitura (em geral, o mês anterior ao da conta).
         {estimado && " Alguns valores foram estimados porque a conta não traz o item da bandeira."}
       </p>
       <p className="sr-only">

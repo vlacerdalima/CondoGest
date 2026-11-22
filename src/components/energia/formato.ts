@@ -37,6 +37,3 @@ export const pct = (v: number, casas = 0, sinal = false) => formatarPercentual(v
 
 /** Cor de série por posição fixa (1..7) */
 export const corSerie = (indice: number) => `var(--chart-${((indice - 1) % 7) + 1})`;
-
-/** Cor do "consumo total" do condomínio na tela do condomínio */
-export const COR_TOTAL = "var(--energy)";

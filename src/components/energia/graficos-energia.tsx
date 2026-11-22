@@ -21,6 +21,7 @@ import {
   CaixaTooltip,
   conteudoTooltip,
   EIXO,
+  escalaBonita,
   GRADE,
   QuadroGrafico,
   type ItemLegenda,
@@ -96,8 +97,9 @@ export function GraficoConsumo({
     ]),
   };
   const valores = linhas.flatMap((l) => [l.valor, ...(l.faixa ?? [])]).filter((v) => v > 0);
-  const minimo = valores.length ? Math.min(...valores) : 0;
+  const minimo = valores.length ? Math.min(...valores, linhaDeBase ?? Infinity) : 0;
   const maximo = valores.length ? Math.max(...valores, linhaDeBase ?? 0) : 1;
+  const escala = escalaBonita(minimo, maximo, 4);
 
   return (
     <QuadroGrafico altura={280} legenda={legenda} tabela={tabela} rotulo={`${nomeSerie} por mês, em ${unidade}`}>
@@ -109,9 +111,9 @@ export function GraficoConsumo({
             {...EIXO}
             axisLine={false}
             width={casas === 2 ? 44 : 48}
-            domain={[Math.max(0, minimo * 0.9), maximo * 1.06]}
-            tickFormatter={(v: number) => (casas === 2 ? v.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) : formatarNumero(v))}
-            tickCount={5}
+            domain={escala.dominio}
+            ticks={escala.ticks}
+            tickFormatter={(v: number) => (casas === 2 ? v.toLocaleString("pt-BR", { maximumFractionDigits: 2 }) : formatarNumero(v))}
           />
           <Tooltip
             cursor={{ stroke: "var(--chart-axis)", strokeWidth: 1 }}
@@ -229,7 +231,7 @@ export function GraficoCustoEmpilhado({
         <BarChart data={linhas} margin={MARGEM} barCategoryGap="22%">
           <CartesianGrid {...GRADE} />
           <XAxis dataKey="rotulo" {...EIXO} interval="preserveStartEnd" minTickGap={14} />
-          <YAxis {...EIXO} axisLine={false} width={58} tickFormatter={reaisCompacto} tickCount={5} />
+          <YAxis {...EIXO} axisLine={false} width={76} tickFormatter={reaisCompacto} tickCount={5} />
           <Tooltip
             cursor={{ fill: "var(--chart-grid)", fillOpacity: 0.5 }}
             content={conteudoTooltip<LinhaEmpilhada>((l) => (
@@ -294,6 +296,7 @@ export function GraficoDemanda({
   const maxMedida = Math.max(0, ...linhas.map((l) => l.medida ?? 0));
   const contratadaAtual = [...linhas].reverse().find((l) => l.contratada)?.contratada;
   const ociosa = contratadaAtual && maxMedida && contratadaAtual > maxMedida;
+  const escalaDemanda = escalaBonita(0, Math.max(maxMedida, contratadaAtual ?? 0, sugerida ?? 0) * 1.05, 4, true);
   const legenda: ItemLegenda[] = [
     { rotulo: "Demanda medida (pico do mês)", cor, forma: "barra" },
     { rotulo: "Demanda contratada (paga)", cor: "var(--muted)", forma: "linha" },
@@ -315,7 +318,7 @@ export function GraficoDemanda({
         <ComposedChart data={linhas} margin={MARGEM} barCategoryGap="25%">
           <CartesianGrid {...GRADE} />
           <XAxis dataKey="rotulo" {...EIXO} interval="preserveStartEnd" minTickGap={14} />
-          <YAxis {...EIXO} axisLine={false} width={44} domain={[0, (m: number) => Math.ceil((m * 1.1) / 10) * 10]} tickFormatter={(v: number) => `${v}`} unit=" kW" tickCount={5} />
+          <YAxis {...EIXO} axisLine={false} width={66} domain={escalaDemanda.dominio} ticks={escalaDemanda.ticks} tickFormatter={(v: number) => `${formatarNumero(v)} kW`} />
           <Tooltip
             cursor={{ fill: "var(--chart-grid)", fillOpacity: 0.5 }}
             content={conteudoTooltip<LinhaDemanda>((l) => (
@@ -386,7 +389,7 @@ export function GraficoMercadoLivre({ linhas, cor }: { linhas: LinhaMercadoLivre
         <BarChart data={linhas} margin={MARGEM} barCategoryGap="20%" barGap={2}>
           <CartesianGrid {...GRADE} />
           <XAxis dataKey="rotulo" {...EIXO} interval="preserveStartEnd" minTickGap={14} />
-          <YAxis {...EIXO} axisLine={false} width={58} tickFormatter={reaisCompacto} tickCount={5} />
+          <YAxis {...EIXO} axisLine={false} width={76} tickFormatter={reaisCompacto} tickCount={5} />
           <Tooltip
             cursor={{ fill: "var(--chart-grid)", fillOpacity: 0.5 }}
             content={conteudoTooltip<LinhaMercadoLivre>((l) => (

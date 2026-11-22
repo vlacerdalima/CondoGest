@@ -50,7 +50,7 @@ import {
 import { cn } from "@/lib/utils";
 import { CartaoRecomendacao } from "./cartao-recomendacao";
 import { Comprovacao } from "./comprovacao";
-import { COR_TOTAL, corSerie, faixaReais, pct, reais } from "./formato";
+import { corSerie, faixaReais, pct, reais } from "./formato";
 import { CardGlossario, Termo } from "./glossario";
 import {
   GraficoConsumo,
@@ -96,16 +96,20 @@ function SeletorUc({
   analise,
   valor,
   onChange,
+  corTotal,
+  corDaUc,
 }: {
   analise: AnaliseEnergiaCondominio;
   valor: string;
   onChange: (v: string) => void;
+  corTotal: string;
+  corDaUc: (ucId?: string) => string;
 }) {
   const ucs = analise.ucs.filter((u) => u.meses.length);
   if (ucs.length <= 1) return null;
   const opcoes = [
-    { id: "todas", titulo: "Todas as contas", sub: `${ucs.length} contas somadas`, cor: COR_TOTAL },
-    ...ucs.map((u) => ({ id: u.uc.id, titulo: u.uc.apelido, sub: u.descricao, cor: corSerie(u.ordem) })),
+    { id: "todas", titulo: "Todas as contas", sub: `${ucs.length} contas somadas`, cor: corTotal },
+    ...ucs.map((u) => ({ id: u.uc.id, titulo: u.uc.apelido, sub: u.descricao, cor: corDaUc(u.uc.id) })),
   ];
   return (
     <div role="radiogroup" aria-label="Conta de energia" className="flex flex-wrap gap-2">
@@ -176,11 +180,16 @@ export function EnergiaCondominio({ condominioId }: { condominioId: string }) {
   const selecao = ucsComDados.some((u) => u.uc.id === selecaoBruta) ? selecaoBruta : "todas";
   const ucSel = analise.ucs.find((u) => u.uc.id === selecao);
   const ucsSel = ucSel ? [ucSel] : ucsComDados;
-  const corSel = ucSel ? corSerie(ucSel.ordem) : ucsComDados.length === 1 ? corSerie(ucsComDados[0].ordem) : COR_TOTAL;
+  // Cor segue a entidade: o condomínio usa a sua cor (a mesma da carteira); cada conta,
+  // as posições seguintes da paleta, em ordem fixa, pulando a cor do condomínio.
+  const corTotal = corSerie(condominio.corSerie);
+  const posicoesUc = [1, 2, 3, 4, 5, 6, 7].filter((i) => i !== condominio.corSerie);
   const corDaUc = (ucId?: string) => {
     const u = analise.ucs.find((x) => x.uc.id === ucId);
-    return u ? corSerie(u.ordem) : COR_TOTAL;
+    if (!u || ucsComDados.length <= 1) return corTotal;
+    return corSerie(posicoesUc[(u.ordem - 1) % posicoesUc.length]);
   };
+  const corSel = ucSel ? corDaUc(ucSel.uc.id) : corTotal;
   const horizontal = condominio.tipo === "horizontal";
   const usarPorCasa = horizontal && porCasa;
   const ocupadasHoje = analise.kpis.ocupadas;
@@ -232,8 +241,9 @@ export function EnergiaCondominio({ condominioId }: { condominioId: string }) {
   }, [avaliacaoSel, serieSel, ucSel, ucsComDados, usarPorCasa]);
 
   /* ---------- custo (24 meses) ---------- */
-  const seriesCusto = ucsSel.map((u) => ({ chave: u.uc.id, nome: u.uc.apelido, cor: corSerie(u.ordem) }));
-  const linhasCusto: LinhaEmpilhada[] = serieSel.slice(-24).map((p) => {
+  const seriesCusto = ucsSel.map((u) => ({ chave: u.uc.id, nome: u.uc.apelido, cor: corDaUc(u.uc.id) }));
+  // Só meses com todas as faturas: um mês com conta faltando pareceria uma queda de custo
+  const linhasCusto: LinhaEmpilhada[] = serieSel.filter((p) => p.completo).slice(-24).map((p) => {
     const linha: LinhaEmpilhada = { competencia: p.competencia, rotulo: formatarCompetencia(p.competencia), total: p.custo };
     for (const u of ucsSel) linha[u.uc.id] = analise.serie.find((x) => x.competencia === p.competencia)?.porUc[u.uc.id]?.custo;
     linha.reaisPorKwh = p.reaisPorKwh;
@@ -374,7 +384,7 @@ export function EnergiaCondominio({ condominioId }: { condominioId: string }) {
           )}
 
           {/* Filtro de conta: vale para tudo abaixo */}
-          <SeletorUc analise={analise} valor={selecao} onChange={setSelecao} />
+          <SeletorUc analise={analise} valor={selecao} onChange={setSelecao} corTotal={corTotal} corDaUc={corDaUc} />
 
           {/* KPIs */}
           {kpis && (
@@ -417,9 +427,10 @@ export function EnergiaCondominio({ condominioId }: { condominioId: string }) {
               {mesA4?.demandaContratadaKw ? (
                 <div className="flex flex-col gap-1 rounded-xl border border-border bg-surface p-4">
                   <div className="flex items-center gap-2 text-sm text-muted">
-                    <Gauge className="size-4" aria-hidden />
-                    <Termo id="demandaContratada">Demanda</Termo>
-                    <span>medida × contratada</span>
+                    <Gauge className="size-4 shrink-0" aria-hidden />
+                    <span className="truncate">
+                      <Termo id="demandaContratada">Demanda</Termo> no pico
+                    </span>
                   </div>
                   <div className="text-2xl font-semibold tracking-tight text-foreground">
                     {formatarNumero(mesA4.demandaMedidaKw ?? 0)}
@@ -526,12 +537,12 @@ export function EnergiaCondominio({ condominioId }: { condominioId: string }) {
 
           {/* Média tensão: demanda e ponta */}
           {ucsA4.map((u) => (
-            <SecaoMediaTensao key={u.uc.id} analise={u} sugerida={analise.recomendacoes.find((r) => r.tipo === "ajustar_demanda" && r.ucId === u.uc.id)} cor={corSerie(u.ordem)} />
+            <SecaoMediaTensao key={u.uc.id} analise={u} sugerida={analise.recomendacoes.find((r) => r.tipo === "ajustar_demanda" && r.ucId === u.uc.id)} cor={corDaUc(u.uc.id)} />
           ))}
 
           {/* Mercado livre */}
           {ucsLivre.map((u) => (
-            <SecaoMercadoLivre key={u.uc.id} analise={u} cor={corSerie(u.ordem)} />
+            <SecaoMercadoLivre key={u.uc.id} analise={u} cor={corDaUc(u.uc.id)} />
           ))}
 
           {/* Bandeiras */}
@@ -704,6 +715,7 @@ function SecaoMediaTensao({
   const tarifaKw = analise.tarifas.demanda;
   const valorSugerido = sugerida ? Number(/para (\d+)/.exec(sugerida.titulo)?.[1] ?? NaN) : NaN;
   const temPonta = analise.meses.some((m) => m.pontaKwh !== undefined);
+  const mesesReativo = meses.filter((m) => m.componentes.reativo > 0);
 
   return (
     <>
@@ -745,20 +757,63 @@ function SecaoMediaTensao({
               )}
             </dl>
             <p className="rounded-lg bg-surface-2 p-3 text-sm text-muted">
-              <strong className="text-foreground">Demanda ociosa</strong> é a parte paga e não usada. É como um plano de internet de 150
-              mega quando a casa nunca passa de 80: dá para reduzir mantendo uma folga de segurança, porque passar da contratada gera
-              multa.
-              {sugerida && (
+              <strong className="text-foreground">Demanda ociosa</strong> é a parte paga e não usada
+              {contratada && maior !== undefined
+                ? ` — como pagar um plano de internet de ${formatarNumero(contratada)} mega quando o uso nunca passa de ${formatarNumero(maior)}`
+                : ""}
+              .{" "}
+              {sugerida ? (
                 <>
-                  {" "}
-                  Proposta: <strong className="text-foreground">{formatarNumero(valorSugerido)} kW</strong>, economia de{" "}
+                  Dá para reduzir mantendo uma folga de segurança (passar da contratada gera multa). Proposta:{" "}
+                  <strong className="text-foreground">{formatarNumero(valorSugerido)} kW</strong>, economia de{" "}
                   {faixaReais(sugerida.economiaMensalReais)}/mês.
                 </>
+              ) : (
+                "Aqui a folga é pequena: a demanda está bem ajustada, e reduzir mais arriscaria multa de ultrapassagem."
               )}
             </p>
           </div>
         </div>
       </Secao>
+      {mesesReativo.length > 0 && (
+        <Secao
+          titulo={
+            <>
+              <Termo id="fatorPotencia">Reativo excedente</Termo> — {analise.uc.apelido}
+            </>
+          }
+          descricao="Multa cobrada quando o fator de potência fica abaixo de 0,92 (motores de bombas e elevadores sem correção)."
+          icone={<AlertTriangle className="size-5 text-warn" aria-hidden />}
+        >
+          <div className="flex flex-wrap items-end gap-x-8 gap-y-2">
+            <div>
+              <p className="text-sm text-muted">Multa nos últimos 12 meses</p>
+              <p className="text-2xl font-semibold text-foreground">{reais(soma(mesesReativo.map((m) => m.componentes.reativo)))}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted">Meses com cobrança</p>
+              <p className="text-2xl font-semibold text-foreground">
+                {mesesReativo.length} de {meses.length}
+              </p>
+            </div>
+          </div>
+          <ol className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
+            {meses.map((m) => (
+              <li key={m.competencia} className="rounded-lg border border-border p-2">
+                <p className="text-xs font-medium text-muted">{formatarCompetencia(m.competencia)}</p>
+                <p className="tabular mt-1 text-sm font-semibold text-foreground">
+                  {m.componentes.reativo > 0 ? reais(m.componentes.reativo) : "—"}
+                </p>
+                {(m.reativoKvarh ?? 0) > 0 && <p className="tabular text-xs text-muted">{formatarNumero(m.reativoKvarh!)} kvarh</p>}
+              </li>
+            ))}
+          </ol>
+          <p className="mt-3 text-sm text-muted">
+            Quando a cobrança aparece em alguns meses e some em outros, o mais comum é um banco de capacitores existente com defeito.
+            Veja a recomendação abaixo.
+          </p>
+        </Secao>
+      )}
       {temPonta && (
         <Secao
           titulo={
@@ -803,7 +858,7 @@ function SecaoMercadoLivre({ analise, cor }: { analise: AnaliseUc; cor: string }
         <Stat rotulo="Economia média por mês" valor={reais(ml.economia12m / Math.max(1, ml.meses12m))} contexto="distribuidora + comercializadora" />
         <Stat rotulo="Acumulada no histórico" valor={reais(ml.economiaTotal)} contexto={`${intervalo} meses desde ${ml.inicio ? formatarCompetencia(ml.inicio) : "—"}`} />
         <Stat
-          rotulo="Preço da energia no contrato"
+          rotulo="Preço no contrato"
           valor={ml.precoMwh ? `${formatarMoeda(ml.precoMwh)}` : "—"}
           contexto={ml.precoMwh ? `por MWh (= ${formatarTarifa(ml.precoMwh / 1000)}, sem ICMS)` : "não informado na conta"}
         />

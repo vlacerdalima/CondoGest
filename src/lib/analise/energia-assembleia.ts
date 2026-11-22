@@ -195,7 +195,7 @@ function fraseComprovacao(rec: RecomendacaoEnergia) {
   const m = METRICAS[rec.metrica];
   if (m.ajusta)
     return `Como vamos prestar contas: vamos comparar o consumo por dia dos meses seguintes com a média dos 12 meses anteriores, já corrigida pelo número de unidades ocupadas e pela época do ano. Assim ninguém confunde economia com mês mais curto ou mais frio.`;
-  return `Como vamos prestar contas: vamos comparar ${m.rotulo.toLowerCase()} das próximas contas com a média dos 12 meses anteriores. O número volta para esta assembleia.`;
+  return `Como vamos prestar contas: vamos comparar ${minusculaInicial(m.rotulo)} das próximas contas com a média dos 12 meses anteriores. O número volta para esta assembleia.`;
 }
 
 export function gerarFalaAssembleia(
@@ -215,7 +215,7 @@ export function gerarFalaAssembleia(
   /* ---------------- bloco 1: o problema ---------------- */
   const problema: string[] = [];
   problema.push(
-    `Hoje o condomínio gasta, em média, ${reaisFalado(gastoMes)} por mês com a energia das áreas comuns — ${reaisFalado(gastoAno)} em ${janela.length === 12 ? "um ano" : `${janela.length} meses`}${parcela && parcela >= 0.1 ? `, o equivalente a ${pct(parcela)} de tudo o que o condomínio paga` : ""}. São ${contasTexto}.`,
+    `Hoje o condomínio gasta, em média, ${reaisFalado(gastoMes)} por mês com a energia das áreas comuns — ${reaisFalado(gastoAno)} em ${janela.length === 12 ? "um ano" : `${janela.length} meses`}${parcela && parcela >= 0.1 ? `, o equivalente a ${pct(parcela)} de tudo o que o condomínio paga` : ""}. ${a.ucs.filter((u) => u.meses.length).length === 1 ? "É" : "São"} ${contasTexto}.`,
   );
   problema.push(
     `Nós organizamos ${a.mesesDeHistorico >= 12 ? `os últimos ${a.mesesDeHistorico} meses` : `os ${a.mesesDeHistorico} meses disponíveis`} dessas contas num só lugar e passamos a olhar o consumo por dia, porque cada conta vem com um número diferente de dias. Assim dá para comparar um mês com o outro de forma justa.`,
@@ -266,7 +266,7 @@ export function gerarFalaAssembleia(
   const economia = rec?.economiaMensalReais;
   const bullets: string[] = [];
   if (rec) {
-    bullets.push(rec.resumo);
+    bullets.push(`Proposta: ${minusculaInicial(rec.titulo)}`);
     const inv = rec.investimentoReais;
     bullets.push(
       !inv || inv.max <= 0
@@ -276,12 +276,12 @@ export function gerarFalaAssembleia(
     bullets.push(
       METRICAS[rec.metrica].ajusta
         ? "Comprovação: consumo por dia × média de 12 meses, corrigida pela ocupação"
-        : `Comprovação: ${METRICAS[rec.metrica].rotulo.toLowerCase()} × média de 12 meses`,
+        : `Comprovação: ${minusculaInicial(METRICAS[rec.metrica].rotulo)} × média de 12 meses`,
     );
   }
 
   const slide: SlideAssembleia = {
-    titulo: rec ? rec.titulo : "Energia das áreas comuns sob acompanhamento",
+    titulo: rec ? rec.resumo : "Energia das áreas comuns sob acompanhamento",
     numero: economia ? (economia.min === economia.max ? reais(economia.min) : `${reais(economia.min)} – ${reais(economia.max)}`) : reaisFalado(gastoMes),
     legendaNumero: economia
       ? `de economia por mês · ${faixaFalada({ min: economia.min * 12, max: economia.max * 12 })} por ano`

@@ -123,7 +123,7 @@ export interface TabelaDados {
 export function Tabela({ tabela, legenda }: { tabela: TabelaDados; legenda?: string }) {
   const numericas = new Set(tabela.numericas ?? tabela.colunas.map((_, i) => i).filter((i) => i > 0));
   return (
-    <div className="max-h-96 overflow-auto rounded-lg border border-border">
+    <div className="relative max-h-96 overflow-auto rounded-lg border border-border">
       <table className="w-full text-sm">
         {legenda && <caption className="sr-only">{legenda}</caption>}
         <thead className="sticky top-0 bg-surface-2 text-xs text-muted">
@@ -203,6 +203,19 @@ export function QuadroGrafico({
       )}
     </figure>
   );
+}
+
+/** Escala com marcas "redondas" (1, 2, 2,5, 5 × 10ⁿ) cobrindo [min, max] */
+export function escalaBonita(min: number, max: number, marcas = 4, desdeZero = false) {
+  const lo0 = desdeZero ? 0 : min;
+  const bruto = Math.max(max - lo0, Math.abs(max) * 0.05, 1e-6) / marcas;
+  const potencia = 10 ** Math.floor(Math.log10(bruto));
+  const passo = [1, 2, 2.5, 5, 10].map((m) => m * potencia).find((p) => p >= bruto) ?? 10 * potencia;
+  const lo = desdeZero ? 0 : Math.floor(lo0 / passo) * passo;
+  const hi = Math.ceil(max / passo) * passo;
+  const ticks: number[] = [];
+  for (let v = lo; v <= hi + passo / 2; v += passo) ticks.push(Math.round(v * 1e6) / 1e6);
+  return { dominio: [lo, hi] as [number, number], ticks };
 }
 
 /** Props padrão de eixos discretos */

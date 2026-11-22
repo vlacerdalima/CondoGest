@@ -33,43 +33,42 @@ function Variacao({ valor }: { valor?: number }) {
 
 function TabelaRanking({ linhas }: { linhas: LinhaCarteiraEnergia[] }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[760px] text-sm">
+    <div className="relative overflow-x-auto">
+      <table className="w-full min-w-[720px] text-sm">
         <caption className="sr-only">Condomínios ordenados pela economia potencial de energia</caption>
         <thead className="border-b border-border text-xs text-muted">
           <tr>
-            <th scope="col" className="py-2 pr-3 pl-5 text-left font-medium">Condomínio</th>
+            <th scope="col" className="min-w-[230px] py-2 pr-3 pl-5 text-left font-medium">Condomínio</th>
             <th scope="col" className="px-3 py-2 text-right font-medium">Consumo por dia</th>
-            <th scope="col" className="px-3 py-2 text-right font-medium">
+            <th scope="col" className="px-3 py-2 text-right font-medium whitespace-nowrap">
               vs. <Termo id="linhaDeBase">linha de base</Termo>
             </th>
             <th scope="col" className="px-3 py-2 text-right font-medium">Custo do mês</th>
             <th scope="col" className="px-3 py-2 text-right font-medium">Por unidade ocupada</th>
             <th scope="col" className="px-3 py-2 text-right font-medium">Ações</th>
-            <th scope="col" className="px-3 py-2 text-right font-medium">Economia potencial</th>
-            <th scope="col" className="py-2 pr-5 pl-3"><span className="sr-only">Abrir</span></th>
+            <th scope="col" className="py-2 pr-5 pl-3 text-right font-medium">Economia potencial</th>
           </tr>
         </thead>
         <tbody className="tabular">
           {linhas.map((l) => (
             <tr key={l.condominio.id} className="border-b border-border last:border-0 hover:bg-surface-2/60">
               <th scope="row" className="py-3 pr-3 pl-5 text-left font-medium text-foreground">
-                <span className="flex items-center gap-2">
-                  <span className="size-2.5 shrink-0 rounded-full" style={{ background: corSerie(l.condominio.corSerie) }} aria-hidden />
+                <span className="flex items-start gap-2">
+                  <span className="mt-1.5 size-2.5 shrink-0 rounded-full" style={{ background: corSerie(l.condominio.corSerie) }} aria-hidden />
                   <span className="min-w-0">
-                    <Link href={`/energia/${l.condominio.slug}`} className="hover:underline">
+                    <Link href={`/energia/${l.condominio.slug}`} className="text-primary hover:underline">
                       {l.condominio.nome}
                     </Link>
                     <span className="block text-xs font-normal text-muted">
                       {l.analise.ucs.filter((u) => u.meses.length).map((u) => u.descricao).join(" + ") || "sem contas"}
                     </span>
+                    {l.anomaliaAtiva && (
+                      <span className="mt-1 inline-flex items-center gap-0.5 rounded-full bg-warn-soft px-1.5 py-0.5 text-[11px] font-medium text-warn">
+                        <AlertTriangle className="size-3" aria-hidden />
+                        Consumo fora do normal
+                      </span>
+                    )}
                   </span>
-                  {l.anomaliaAtiva && (
-                    <span className="inline-flex items-center gap-0.5 rounded-full bg-warn-soft px-1.5 py-0.5 text-[11px] font-medium text-warn">
-                      <AlertTriangle className="size-3" aria-hidden />
-                      anomalia
-                    </span>
-                  )}
                 </span>
               </th>
               <td className="px-3 py-3 text-right whitespace-nowrap text-foreground">{l.kwhDia !== undefined ? formatarKwhDia(l.kwhDia) : "—"}</td>
@@ -82,17 +81,14 @@ function TabelaRanking({ linhas }: { linhas: LinhaCarteiraEnergia[] }) {
                 {l.ocupadas ? <span className="block text-xs text-muted">{formatarNumero(l.ocupadas)} ocupadas</span> : null}
               </td>
               <td className="px-3 py-3 text-right text-foreground">{l.recomendacoes}</td>
-              <td className="px-3 py-3 text-right font-semibold whitespace-nowrap text-foreground">
-                {l.recomendacoes ? `${faixaReais(l.economiaPotencial)}/mês` : "—"}
-              </td>
-              <td className="py-3 pr-5 pl-3 text-right">
+              <td className="py-3 pr-5 pl-3 text-right whitespace-nowrap">
                 <Link
-                  href={`/energia/${l.condominio.slug}`}
-                  className="inline-flex items-center gap-0.5 text-sm font-medium text-primary hover:underline"
-                  aria-label={`Abrir energia de ${l.condominio.nome}`}
+                  href={`/energia/${l.condominio.slug}#recomendacoes`}
+                  className="inline-flex items-center gap-0.5 font-semibold text-foreground hover:text-primary hover:underline"
+                  aria-label={`Ver recomendações de ${l.condominio.nome}`}
                 >
-                  Abrir
-                  <ChevronRight className="size-4" aria-hidden />
+                  {l.recomendacoes ? `${faixaReais(l.economiaPotencial)}/mês` : "—"}
+                  <ChevronRight className="size-4 text-muted" aria-hidden />
                 </Link>
               </td>
             </tr>
@@ -183,7 +179,7 @@ export function VisaoCarteiraEnergia() {
       <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-4">
         <Stat
           icone={<Receipt aria-hidden />}
-          rotulo={`Gasto com energia · ${formatarCompetencia(resumo.competencia)}`}
+          rotulo={`Gasto em ${formatarCompetencia(resumo.competencia)}`}
           valor={reais(resumo.gasto)}
           variacao={resumo.variacaoGasto !== undefined ? resumo.variacaoGasto * 100 : undefined}
           bomQuando="cair"
@@ -191,7 +187,7 @@ export function VisaoCarteiraEnergia() {
         />
         <Stat
           icone={<Zap className="text-energy" aria-hidden />}
-          rotulo={`Consumo · ${formatarCompetencia(resumo.competencia)}`}
+          rotulo={`Consumo em ${formatarCompetencia(resumo.competencia)}`}
           valor={`${formatarNumero(resumo.kwh)} kWh`}
           contexto={`${formatarKwhDia(resumo.kwhDia)} somando os condomínios`}
         />
@@ -204,13 +200,13 @@ export function VisaoCarteiraEnergia() {
         <Stat
           destaque="primario"
           icone={<Trophy aria-hidden />}
-          rotulo={
-            <>
-              Economia do <Termo id="mercadoLivre">mercado livre</Termo>
-            </>
-          }
+          rotulo={<Termo id="mercadoLivre">Mercado livre</Termo>}
           valor={reais(resumo.economiaLivre12m)}
-          contexto={resumo.ucsNoLivre ? `últimos 12 meses · ${resumo.ucsNoLivre} ${resumo.ucsNoLivre === 1 ? "conta" : "contas"}` : "nenhuma conta no livre"}
+          contexto={
+            resumo.ucsNoLivre
+              ? `economizados em 12 meses · ${resumo.ucsNoLivre} ${resumo.ucsNoLivre === 1 ? "conta" : "contas"}`
+              : "nenhuma conta no mercado livre"
+          }
         />
       </div>
 

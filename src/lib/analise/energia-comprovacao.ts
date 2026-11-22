@@ -48,9 +48,9 @@ export function formatarValorMetrica(metrica: MetricaComprovacao, v: number) {
 function valorDaMetrica(metrica: MetricaComprovacao, p: PontoSerie): number | undefined {
   switch (metrica) {
     case "kwh_dia":
-      return p.kwh > 0 ? p.kwhDia : undefined;
+      return p.kwhCompleto ? p.kwhDia : undefined;
     case "kwh_ponta_dia":
-      return p.pontaKwhDia;
+      return p.kwhCompleto ? p.pontaKwhDia : undefined;
     case "custo_demanda":
       return p.completo ? p.custoDemanda : undefined;
     case "custo_reativo":
@@ -113,6 +113,8 @@ export interface ResultadoComprovacao {
 }
 
 const pct = (v: number, casas = 1) => formatarPercentual(v * 100, { casas });
+/** Só a primeira letra em minúscula (preserva "kWh") */
+const minusculaInicial = (t: string) => (t ? t[0].toLowerCase() + t.slice(1) : t);
 
 function regraDaMetrica(metrica: MetricaComprovacao, variacaoNormal: number): string[] {
   const d = METRICAS[metrica];
@@ -126,7 +128,7 @@ function regraDaMetrica(metrica: MetricaComprovacao, variacaoNormal: number): st
     );
   } else {
     passos.push(
-      `Medimos ${d.rotulo.toLowerCase()} (${d.unidade}) em cada conta completa.`,
+      `Medimos ${minusculaInicial(d.rotulo)} (${d.unidade}) em cada conta completa.`,
       `Linha de base: a média dos 12 meses antes da ação.${metrica === "reais_por_kwh" ? " A bandeira tarifária é retirada da conta, para um mês de bandeira vermelha não parecer aumento de preço." : ""}`,
       "Aqui não há ajuste por ocupação nem por estação: o valor não depende de quanto se consome.",
     );
@@ -297,7 +299,7 @@ export function comprovarAcao(
         comAcao,
         reducaoPercentual,
         economiaReais: rec.economiaMensalReais,
-        texto: `Se a ação começar em ${formatarCompetenciaLonga(inicio)}, o esperado é que o indicador "${definicao.rotulo.toLowerCase()}" saia de cerca de ${fmt(esperadoMedio)} para ${fmt(comAcao.min)} a ${fmt(comAcao.max)} (−${pct(reducaoPercentual.min)} a −${pct(reducaoPercentual.max)}). Para comprovar, volte aqui depois de 2 contas e informe o mês em que a ação foi feita.`,
+        texto: `Se a ação começar em ${formatarCompetenciaLonga(inicio)}, o esperado é que o indicador "${minusculaInicial(definicao.rotulo)}" saia de cerca de ${fmt(esperadoMedio)} para ${fmt(comAcao.min)} a ${fmt(comAcao.max)} (−${pct(reducaoPercentual.min)} a −${pct(reducaoPercentual.max)}). Para comprovar, volte aqui depois de 2 contas e informe o mês em que a ação foi feita.`,
       },
     };
   }

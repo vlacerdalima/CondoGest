@@ -559,7 +559,9 @@ function fatorPotencia(ctx: ContextoUc): Rascunho[] {
     ? media(janela.map((m) => m.componentes.reativo))
     : media(janela.map((m) => (m.reativoKvarh ?? 0) * (a.tarifas.reativo ?? TARIFAS_PADRAO.reativoKvarh)));
   if (custoMes < 30) return [];
-  const economia = arredondarFaixa({ min: custoMes * 0.8, max: custoMes });
+  // Se a multa está maior nos últimos meses (defeito em curso), a faixa máxima usa o valor recente
+  const custoRecente = temItem ? media(janela.slice(-3).map((m) => m.componentes.reativo)) : custoMes;
+  const economia = arredondarFaixa({ min: custoMes * 0.8, max: Math.max(custoMes, custoRecente) });
   const kvarhMes = media(janela.map((m) => m.reativoKvarh ?? 0));
   const novo = a.uc.subgrupo === "A4" ? { min: 6_000, max: 18_000 } : { min: 2_500, max: 8_000 };
   // A cobrança aparece e some: sinal típico de banco de capacitores que já existe e falha
@@ -583,14 +585,17 @@ function fatorPotencia(ctx: ContextoUc): Rascunho[] {
       premissas: [
         `Reativo excedente cobrado em ${comReativo.length} de ${janela.length} meses; média de ${formatarNumero(kvarhMes)} kvarh/mês e ${reais(custoMes)}/mês${temItem ? "" : " (valor estimado — a conta não detalha o item)"}.`,
         "A cobrança acontece quando o fator de potência fica abaixo de 0,92.",
-        "Um banco de capacitores automático, bem dimensionado, elimina 80% a 100% dessa cobrança.",
+        ...(custoRecente > custoMes * 1.1
+          ? [`Nos últimos 3 meses a multa subiu para ${reais(custoRecente)}/mês em média: a faixa máxima usa esse valor.`]
+          : []),
+        "Um banco de capacitores automático, bem dimensionado, elimina praticamente toda essa cobrança (faixa mínima: 80% da média de 12 meses).",
         intermitente
           ? `A cobrança aparece e some (${mesesComReativo.join(", ")}): sinal típico de um banco de capacitores que já existe e está falhando. Consertar custa a partir de ${reais(investimento.min)}; um banco novo, até ${reais(novo.max)}.`
           : `Investimento típico de um banco novo, com instalação: ${faixaReais(novo)} (depende do tamanho; peça laudo de um eletricista).`,
         motores.length ? `Cargas com motor nesta conta: ${motores.join(", ").toLowerCase()}.` : "Motores (bombas, elevadores) são a causa mais comum.",
       ],
       esforco: "medio",
-      calculo: `80% a 100% da multa média de ${reais(custoMes)}/mês`,
+      calculo: `de 80% da multa média de 12 meses (${reais(custoMes)}/mês) até a multa dos últimos 3 meses (${reais(Math.max(custoMes, custoRecente))}/mês)`,
       explicacao: `Motores de bombas e elevadores puxam da rede uma energia "de sobra" (reativa) que não vira trabalho. Quando ela passa do limite, a distribuidora cobra uma multa — aqui, ${reais(custoMes)} por mês em média. ${intermitente ? "Como a multa aparece em alguns meses e some em outros, é provável que o banco de capacitores do prédio esteja com defeito — consertar costuma resolver." : "Um banco de capacitores corrige isso na origem."} O investimento se paga com a própria multa que deixa de ser cobrada.`,
       decisao: intermitente
         ? "Aprovar a vistoria e o conserto do banco de capacitores (ou a troca, se o laudo indicar)."
