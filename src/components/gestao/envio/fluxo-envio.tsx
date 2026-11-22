@@ -35,6 +35,7 @@ import type { Conta, ResultadoExtracao } from "@/lib/tipos";
 import { cn } from "@/lib/utils";
 import { IconeCategoria } from "../categoria";
 import { formatarTamanhoArquivo } from "../formato";
+import { ROTULOS_TIPO_FATURA } from "../rotulos";
 import { ContasEnviadas } from "./contas-enviadas";
 import { FormularioRevisao, type DadosIniciaisRevisao } from "./formulario-revisao";
 import { FORMULARIO_VAZIO, formularioDaExtracao } from "./modelo";
@@ -73,7 +74,7 @@ function Etapas({ atual, semArquivo }: { atual: Etapa; semArquivo: boolean }) {
     <nav aria-label="Etapas do envio">
       <ol className="grid grid-cols-4 gap-2">
         {ETAPAS.map((e, i) => {
-          const pulada = semArquivo && i === 1 && indiceAtual > 1;
+          const pulada = semArquivo && i <= 1 && indiceAtual > 1;
           const concluida = i < indiceAtual || atual === "sucesso";
           const ehAtual = i === indiceAtual && atual !== "sucesso";
           return (
@@ -340,7 +341,12 @@ function ResultadoReconhecido({
     { rotulo: "Mês", valor: formatarCompetencia(c.competencia) },
     { rotulo: "Vencimento", valor: formatarData(c.vencimento) },
     { rotulo: "Valor", valor: formatarMoeda(c.valor) },
-    ...(c.energia ? [{ rotulo: "Consumo", valor: `${c.energia.consumoKwh.toLocaleString("pt-BR")} kWh em ${c.energia.dias} dias` }] : []),
+    ...(c.energia
+      ? [
+          { rotulo: "Tipo de fatura", valor: ROTULOS_TIPO_FATURA[c.energia.tipoFatura] },
+          { rotulo: "Consumo", valor: `${c.energia.consumoKwh.toLocaleString("pt-BR")} kWh em ${c.energia.dias} dias` },
+        ]
+      : []),
   ];
   return (
     <div className="rounded-xl border border-ok/30 bg-ok-soft p-5">
@@ -618,7 +624,7 @@ export function FluxoEnvio() {
           aoVoltar={recomecar}
         />
       ) : (
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">
           <Card className="p-5 sm:p-6 lg:col-span-2">
             {etapa === "arquivo" && (
               <EtapaArquivo erro={erroArquivo} aoEscolher={escolher} aoPreencherManual={() => irParaRevisao(true)} />

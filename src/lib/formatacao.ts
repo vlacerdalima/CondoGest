@@ -42,9 +42,12 @@ export function formatarPercentual(valor: number, opcoes: { sinal?: boolean; cas
   if (valor < 0) return `−${texto}`;
   return texto;
 }
-/** R$ 1.200 – R$ 1.800 */
-export const formatarFaixaMoeda = (faixa: { min: number; max: number }) =>
-  `${formatarMoeda(faixa.min).replace(",00", "")} – ${formatarMoeda(faixa.max).replace(",00", "")}`;
+/** R$ 1.200 – R$ 1.800 (ou um valor só, quando mín e máx coincidem) */
+export function formatarFaixaMoeda(faixa: { min: number; max: number }) {
+  const min = formatarMoeda(Math.round(faixa.min)).replace(",00", "");
+  const max = formatarMoeda(Math.round(faixa.max)).replace(",00", "");
+  return min === max ? min : `${min} – ${max}`;
+}
 
 const MESES_CURTOS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
 const MESES_LONGOS = [

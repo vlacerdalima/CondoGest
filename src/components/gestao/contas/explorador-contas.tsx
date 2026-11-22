@@ -200,7 +200,7 @@ export function ExploradorContas() {
 
       {/* Filtros: uma linha acima de tudo o que eles afetam */}
       <div className="rounded-xl border border-border bg-surface p-4">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.6fr)_repeat(4,minmax(0,1fr))]">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.6fr)_repeat(4,minmax(0,1fr))] [&>*]:min-w-0">
           <div className="sm:col-span-2 lg:col-span-1">
             <Rotulo htmlFor="filtro-busca">Buscar</Rotulo>
             <div className="relative">
@@ -415,10 +415,7 @@ export function ExploradorContas() {
                               >
                                 {c.descricao}
                               </button>
-                              <p className="flex items-center gap-1.5 truncate text-xs text-muted">
-                                <span className="truncate">{c.fornecedor}</span>
-                                <SeloOrigem conta={c} />
-                              </p>
+                              <p className="truncate text-xs text-muted">{c.fornecedor}</p>
                             </div>
                           </div>
                         </td>
@@ -427,7 +424,10 @@ export function ExploradorContas() {
                         <td className="tabular px-3 py-2.5 text-muted">{formatarData(c.vencimento)}</td>
                         <td className="tabular px-3 py-2.5 text-right font-medium text-foreground">{formatarMoeda(c.valor)}</td>
                         <td className="px-3 py-2.5">
-                          <StatusBadge status={status} />
+                          <div className="flex flex-col items-start gap-1">
+                            <StatusBadge status={status} />
+                            <SeloOrigem conta={c} />
+                          </div>
                         </td>
                         <td className="px-4 py-2.5">
                           <div className="flex justify-end gap-1">

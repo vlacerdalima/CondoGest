@@ -47,7 +47,7 @@ export function ListaCondominios() {
         }
       />
 
-      <ul className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <ul className="grid gap-5 md:grid-cols-2 xl:grid-cols-3 [&>*]:min-w-0">
         {cartoes.map(({ resumo, serie, alertas, ocupadas }) => {
           const c = resumo.condominio;
           const ocupacao = (ocupadas / c.unidades) * 100;

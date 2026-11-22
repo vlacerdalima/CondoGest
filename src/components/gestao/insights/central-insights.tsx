@@ -71,7 +71,7 @@ export function CentralInsights() {
         descricao="Alertas e oportunidades encontrados nas contas da carteira, do mais urgente ao menos urgente. Cada um tem um link para você conferir os números."
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 [&>*]:min-w-0">
         {ORDEM_SEVERIDADES.map((s) => {
           const { rotulo, icone: Icone } = SEVERIDADES[s];
           const ativo = severidade === s;
@@ -175,7 +175,7 @@ export function CentralInsights() {
           descricao="Tente outro condomínio, categoria ou severidade."
         />
       ) : (
-        <ul className="grid gap-4 lg:grid-cols-2">
+        <ul className="grid gap-4 lg:grid-cols-2 [&>*]:min-w-0">
           {filtrados.map((i) => (
             <li key={i.id}>
               <CartaoInsight insight={i} />

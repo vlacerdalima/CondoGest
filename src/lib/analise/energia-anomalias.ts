@@ -4,8 +4,8 @@
  * Regra (explicável sem jargão):
  *  - comparamos sempre kWh POR DIA (ciclos de 28–33 dias não distorcem);
  *  - linha de base = média dos 12 meses anteriores, sem os meses marcados como anomalia;
- *  - ajuste por ocupação: metade do consumo das áreas comuns acompanha o número
- *    de unidades ocupadas (portaria, bombas, ETE…); a outra metade não (postes, piscina);
+ *  - ajuste por ocupação: ~30% do consumo das áreas comuns acompanha o número
+ *    de unidades ocupadas (bombas de água, ETE…); o resto não (postes, piscina, portaria);
  *  - ajuste de estação: quando existe o mesmo mês do ano anterior, o "esperado"
  *    é a média entre a linha de base e esse mês (os dois ajustados pela ocupação);
  *  - anomalia = mês acima da faixa normal (esperado ± variação normal, mín. 8%, máx. 20%).
@@ -15,7 +15,7 @@ import type { Competencia } from "../tipos";
 import { desvioPadrao, limitar, media, soma } from "./energia-dados";
 
 /** Parcela do consumo das áreas comuns que acompanha a ocupação (premissa) */
-export const PARCELA_LIGADA_A_OCUPACAO = 0.5;
+export const PARCELA_LIGADA_A_OCUPACAO = 0.3;
 
 /** Fator para levar um valor medido com `ocupacaoReferencia` unidades para `ocupacaoAlvo` unidades */
 export function fatorOcupacao(ocupacaoAlvo: number, ocupacaoReferencia: number) {

@@ -108,7 +108,7 @@ export function DetalheCondominio({ condominioId }: { condominioId: string }) {
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 [&>*]:min-w-0">
         <Stat
           rotulo={`Gasto em ${formatarCompetencia(COMPETENCIA_ATUAL)}`}
           icone={<Wallet className="text-subtle" aria-hidden />}
@@ -145,7 +145,7 @@ export function DetalheCondominio({ condominioId }: { condominioId: string }) {
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">
         <Card className="lg:col-span-2">
           <CardHeader
             titulo="Evolução dos gastos"
@@ -219,7 +219,7 @@ export function DetalheCondominio({ condominioId }: { condominioId: string }) {
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
         <Card>
           <CardHeader
             titulo="Para onde vai o dinheiro"

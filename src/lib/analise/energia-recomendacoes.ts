@@ -323,7 +323,9 @@ function ponta(ctx: ContextoUc): Rascunho[] {
   if (parcela < 0.04 || diferenca <= 0.05) return [];
 
   const deslocaveis = contem(cargas, DESLOCAVEIS);
-  const fracao = deslocaveis.length ? { min: 0.3, max: 0.6 } : { min: 0.15, max: 0.3 };
+  // Quanto mais cargas que podem esperar (bombas de recalque, filtragem, ETE), maior a parte que muda de horário
+  const n = deslocaveis.length;
+  const fracao = n ? { min: Math.min(0.3, 0.15 + 0.05 * n), max: Math.min(0.55, 0.25 + 0.1 * n) } : { min: 0.1, max: 0.2 };
   const kwhDeslocados = arredondarFaixa({ min: pontaMes * fracao.min, max: pontaMes * fracao.max });
   const economia = arredondarFaixa({ min: kwhDeslocados.min * diferenca, max: kwhDeslocados.max * diferenca });
   if (economia.max < 50) return [];

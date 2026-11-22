@@ -121,7 +121,7 @@ function regraDaMetrica(metrica: MetricaComprovacao, variacaoNormal: number): st
     passos.push(
       `Medimos o consumo em kWh por dia${metrica === "kwh_ponta_dia" ? ", só do horário de ponta" : ""}: cada conta tem de 28 a 33 dias, e dividir pelos dias deixa os meses comparáveis.`,
       "Linha de base: a média dos 12 meses antes da ação, sem os meses marcados como anomalia.",
-      `Ajuste por ocupação: consideramos que ${pct(PARCELA_LIGADA_A_OCUPACAO, 0)} do consumo das áreas comuns acompanha o número de unidades ocupadas. Se a ocupação sobe 10%, o esperado sobe 5%.`,
+      `Ajuste por ocupação: consideramos que ${pct(PARCELA_LIGADA_A_OCUPACAO, 0)} do consumo das áreas comuns acompanha o número de unidades ocupadas (bombas de água, esgoto); o resto não muda (postes, piscina, portaria). Se a ocupação sobe 10%, o esperado sobe ${pct(PARCELA_LIGADA_A_OCUPACAO * 0.1, 0)}.`,
       "Ajuste de estação: quando existe o mesmo mês do ano anterior, o esperado é a média entre a linha de base e esse mês (os dois corrigidos pela ocupação).",
     );
   } else {

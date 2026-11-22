@@ -173,7 +173,7 @@ export function PainelCarteira() {
       )}
 
       {/* KPIs */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 [&>*]:min-w-0">
         <Kpi rotulo={`Gasto total em ${formatarCompetencia(COMPETENCIA_ATUAL)}`} icone={<Wallet className="text-subtle" aria-hidden />} valor={formatarMoedaInteira(resumo.gastoMes)}>
           <span className="flex flex-wrap gap-x-3 gap-y-1">
             <Variacao valor={resumo.variacaoMes} rotulo={`vs. ${formatarCompetencia(MES_ANTERIOR)}`} />
@@ -254,7 +254,7 @@ export function PainelCarteira() {
       </div>
 
       {/* Gráfico + insights */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">
         <Card className="lg:col-span-2">
           <CardHeader
             titulo="Gastos dos últimos 12 meses"
@@ -418,7 +418,7 @@ export function PainelCarteira() {
       </Card>
 
       {/* Vencimentos + envio */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">
         <Card className="lg:col-span-2">
           <CardHeader
             titulo="Próximos vencimentos"

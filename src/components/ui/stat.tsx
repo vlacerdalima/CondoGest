@@ -46,7 +46,9 @@ export function Stat({
         {icone && <span className="[&_svg]:size-4">{icone}</span>}
         <span className="truncate">{rotulo}</span>
       </div>
-      <div className="tabular text-2xl font-semibold tracking-tight text-foreground">{valor}</div>
+      <div className="text-2xl font-semibold tracking-tight text-foreground [font-variant-numeric:proportional-nums]">
+        {valor}
+      </div>
       {(temVariacao || contexto) && (
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
           {temVariacao && (

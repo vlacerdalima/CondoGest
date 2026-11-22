@@ -20,7 +20,7 @@ import { GraficoCustoEmpilhado, type LinhaEmpilhada } from "./graficos-energia";
 
 function Variacao({ valor }: { valor?: number }) {
   if (valor === undefined || !Number.isFinite(valor)) return <span className="text-muted">—</span>;
-  const neutro = Math.abs(valor) < 0.03;
+  const neutro = Math.abs(valor) < 0.05;
   const Icone = neutro ? Minus : valor > 0 ? ArrowUpRight : ArrowDownRight;
   return (
     <span className={cn("inline-flex items-center gap-0.5 font-medium", neutro ? "text-muted" : valor > 0 ? "text-critical" : "text-ok")}>

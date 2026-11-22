@@ -226,7 +226,7 @@ export function FormularioRevisao({
       : undefined;
 
   return (
-    <form onSubmit={salvar} noValidate className="grid gap-6 lg:grid-cols-3">
+    <form onSubmit={salvar} noValidate className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">
       <div className="space-y-6 lg:col-span-2">
         {/* Origem dos dados */}
         {inicial.origem === "reconhecido" && (
@@ -286,7 +286,7 @@ export function FormularioRevisao({
 
         <Card className="p-5 sm:p-6">
           <Secao titulo="De quem é a conta" numero={1}>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 [&>*]:min-w-0">
               <Campo rotulo="Condomínio" obrigatorio erro={erroDe("condominioId")} id={idCampo("condominioId")} lido={lido("condominioId")}>
                 <select
                   {...a11y("condominioId")}
@@ -353,7 +353,7 @@ export function FormularioRevisao({
           </Secao>
 
           <Secao titulo="Valores e datas" numero={2}>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 [&>*]:min-w-0">
               <Campo rotulo="Valor" obrigatorio erro={erroDe("valor")} id={idCampo("valor")} lido={lido("valor")}>
                 <div className="relative">
                   <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-muted">R$</span>
@@ -370,7 +370,7 @@ export function FormularioRevisao({
                   {valor && valor > 0 ? `= ${formatarMoeda(valor)}` : "Use vírgula para os centavos: 1.234,56"}
                 </p>
               </Campo>
-              <Campo rotulo="Mês de referência" obrigatorio erro={erroDe("competencia")} id={idCampo("competencia")} lido={lido("competencia")} dica="competência">
+              <Campo rotulo="Mês de referência" obrigatorio erro={erroDe("competencia")} id={idCampo("competencia")} lido={lido("competencia")}>
                 <select
                   {...a11y("competencia")}
                   value={form.competencia}
@@ -433,7 +433,7 @@ export function FormularioRevisao({
 
           {form.categoria === "energia" && (
             <Secao titulo="Detalhes da energia" numero={3} icone={<Zap className="size-4 text-energy" aria-hidden />}>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2 [&>*]:min-w-0">
                 <Campo
                   rotulo="Unidade consumidora"
                   obrigatorio
@@ -476,7 +476,7 @@ export function FormularioRevisao({
                       {ROTULOS_TIPO_FATURA.completa} <span className="text-muted">— esta UC compra energia da distribuidora (mercado cativo).</span>
                     </p>
                   ) : (
-                    <div className="grid gap-2 sm:grid-cols-2" id={idCampo("tipoFatura")}>
+                    <div className="grid gap-2 sm:grid-cols-2 [&>*]:min-w-0" id={idCampo("tipoFatura")}>
                       {(["distribuicao", "energia_livre"] as TipoFaturaEnergia[]).map((t) => (
                         <label
                           key={t}
@@ -608,7 +608,7 @@ export function FormularioRevisao({
 
           {(form.categoria === "agua" || form.categoria === "gas") && (
             <Secao titulo={form.categoria === "agua" ? "Detalhes da água" : "Detalhes do gás"} numero={3}>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2 [&>*]:min-w-0">
                 <Campo
                   rotulo="Consumo (m³)"
                   obrigatorio={form.categoria === "agua"}
@@ -702,7 +702,7 @@ export function FormularioRevisao({
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
           <Button variante="fantasma" onClick={aoVoltar}>
             <ArrowLeft aria-hidden />
-            Voltar e trocar o arquivo
+            {arquivo ? "Voltar e trocar o arquivo" : "Voltar e enviar um arquivo"}
           </Button>
           <Button type="submit" tamanho="lg">
             <Save aria-hidden />
@@ -824,7 +824,7 @@ function Campo({
           )}
         </span>
         {lido && <SeloLido />}
-        {dica && <span className="ml-auto text-xs font-normal text-muted">{dica}</span>}
+        {dica && <span className="text-xs font-normal text-muted">({dica})</span>}
       </label>
       {children}
       {erro && (
